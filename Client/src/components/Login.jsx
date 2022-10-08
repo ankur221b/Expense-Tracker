@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const API_URL = process.env.REACT_APP_API_URL;
 const fields = loginFields;
 
 export default function Login() {
@@ -28,7 +29,6 @@ export default function Login() {
 			default:
 		}
 	};
-
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		authenticateUser();
@@ -40,10 +40,8 @@ export default function Login() {
 			email: email,
 			password: password,
 		};
-		const response = await axios.post(
-			'http://localhost:4000/login',
-			userData
-		);
+		console.log(API_URL);
+		const response = await axios.post(`${API_URL}/login`, userData);
 
 		if (response.data.isValid === true) {
 			loginUser(response.data.username);

@@ -1,12 +1,10 @@
 const express = require('express');
-const router = express.Router();
+const userRouter = express.Router();
+const userController = require('../controllers/userController');
 
 // Login page route.
-router.get('/', function (req, res) {
-	res.send('Wiki home page');
-});
-
+userRouter.post('/login', userController.login);
 // Signup page route.
-router.get('/signup', function (req, res) {
-	res.send('About this wiki');
-});
+userRouter.post('/signup', userController.signup);
+
+module.exports = userRouter;

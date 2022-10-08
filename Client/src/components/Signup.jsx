@@ -5,6 +5,8 @@ import FormAction from './FormAction';
 import Input from './Input';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+
+const API_URL = process.env.REACT_APP_API_URL;
 const fields = signupFields;
 
 export default function Signup() {
@@ -49,10 +51,7 @@ export default function Signup() {
 			email: email,
 			password: password,
 		};
-		const response = await axios.post(
-			'http://localhost:4000/signup',
-			userData
-		);
+		const response = await axios.post(`${API_URL}/signup`, userData);
 
 		if (response.data === 'ok') {
 			toast('User created', { type: 'success' });

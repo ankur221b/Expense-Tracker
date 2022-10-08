@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const Home = () => {
 	const navigate = useNavigate();
@@ -20,6 +21,7 @@ const Home = () => {
 
 	const logOutUser = () => {
 		navigate('/');
+		toast('Logged out Successfully', { type: 'success' });
 	};
 
 	return (
