@@ -40,13 +40,13 @@ export default function Login() {
 			email: email,
 			password: password,
 		};
-		console.log(API_URL);
+
 		const response = await axios.post(`${API_URL}/login`, userData);
 
-		if (response.data.isValid === true) {
+		if (response.data.success) {
 			loginUser(response.data.username);
 		} else {
-			toast(response.data, { type: 'error' });
+			toast(response.data.message, { type: 'error' });
 		}
 	};
 

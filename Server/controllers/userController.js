@@ -1,59 +1,64 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/userModel');
+const User = require('../models/userModel');
 
 exports.signup = async (req, res) => {
-	const username = req.body.username;
-	const email = req.body.email;
-	const password = req.body.password;
-
-	const salt = bcrypt.genSaltSync(10);
-	const hashedPassword = bcrypt.hashSync(password, salt);
-	const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY);
-
-	const user = new User({
-		username: username,
-		email: email,
-		password: hashedPassword,
-		token,
+	const { username, email, password } = req.body;
+	const userFromDB = await User.findOne({ email }).exec();
+	if (userFromDB != null) {
+		return res.status(200).json({
+			success: false,
+			message: 'Email already exist',
+		});
+	}
+	const user = await User.create({
+		username,
+		email,
+		password,
 	});
 
-	const userAlreadyExist = await checkuserAlreadyExist(user);
+	const token = await user.getJwtToken();
+	const options = {
+		expires: Date.now() + process.env.COOKIE_TOKEN * 24 * 60 * 60 * 1000,
+		httpOnly: true,
+	};
 
-	if (userAlreadyExist) {
-		res.send('user already exist');
-	} else {
-		user.save()
-			.then((e) => {
-				res.send('ok');
-			})
-			.catch((error) => {
-				res.send('error occured');
-			});
-	}
+	await user.save();
+	user.password = undefined;
+	res.status(200).cookie('token', token, options).json({
+		success: true,
+		token,
+		user,
+	});
 };
 
 exports.login = async (req, res) => {
-	const email = req.body.email;
-	const password = req.body.password;
-	const user = {
-		email: email,
-	};
+	const { email, password } = req.body;
 
-	const response = await User.findOne(user).exec();
-	if (response == null) {
-		return res.send('user does not exist');
+	const userFromDB = await User.findOne({ email }).exec();
+
+	if (userFromDB == null) {
+		return res.status(200).json({
+			success: false,
+			message: 'Incorrect credentials',
+		});
 	}
-	const isValid = bcrypt.compareSync(password, response.password);
+
+	const user = await User.create(userFromDB);
+	const isValid = await user.IsValidatedPassword(password);
+
 	if (isValid) {
-		return res.json({
-			isValid: isValid,
-			username: response.username,
-			email: response.email,
+		console.log(`user validated`);
+		return res.status(200).json({
+			success: true,
+			username: user.username,
+			email: user.email,
 		});
 	} else {
-		return res.json({
-			isValid: isValid,
+		console.log(`user not validated`);
+		return res.status(200).json({
+			success: false,
+			message: 'Incorrect credentials',
 		});
 	}
 };

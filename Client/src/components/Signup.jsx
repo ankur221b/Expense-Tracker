@@ -42,7 +42,7 @@ export default function Signup() {
 	//handle Signup API Integration here
 	const createAccount = async () => {
 		if (password !== confirmPassword) {
-			alert('Passwords do not match');
+			toast('Passwords do not match', { type: 'error' });
 			return;
 		}
 
@@ -51,13 +51,14 @@ export default function Signup() {
 			email: email,
 			password: password,
 		};
+
 		const response = await axios.post(`${API_URL}/signup`, userData);
 
-		if (response.data === 'ok') {
+		if (response.data.success) {
 			toast('User created', { type: 'success' });
 			navigate('/');
 		} else {
-			toast(response.data, { type: 'error' });
+			toast(response.data.message, { type: 'error' });
 		}
 	};
 
